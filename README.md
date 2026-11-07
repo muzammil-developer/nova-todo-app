@@ -2,6 +2,8 @@
 
 A simple, responsive, and user-friendly Todo Application built with HTML, CSS, JavaScript, Bootstrap, and Firebase.
 
+🌐 **Live Demo:** [Nova – Todo App](https://muzammil-developer.github.io/nova-todo-app/)
+
 Nova helps users manage their daily tasks by allowing them to add, view, and delete todos. Each user can access only their own todos through Firebase Authentication and Cloud Firestore.
 
 ## 🚀 Features
@@ -9,6 +11,7 @@ Nova helps users manage their daily tasks by allowing them to add, view, and del
 - **User Authentication:** Secure login using Firebase Authentication.
 - **Add Todos:** Easily add new tasks.
 - **View Todos:** Display all your saved tasks.
+- **Edit Todos:** Update existing tasks.
 - **Delete Todos:** Remove tasks whenever you want.
 - **User-Specific Todos:** Each user can only see their own todos.
 - **Cloud Database:** Store todos in Firebase Firestore.
@@ -32,6 +35,7 @@ Nova-Todo-App/
 │
 ├── index.html
 ├── dashboard.html
+├── signup.html
 ├── style.css
 ├── index.js
 ├── dashboard.js
@@ -44,7 +48,7 @@ Nova-Todo-App/
 1. Clone this repository:
 
    ```bash
-   git clone nova-todo-app
+   git clone https://github.com/muzammil-developer/nova-todo-app.git
    ```
 
 2. Open the project folder in VS Code.
@@ -86,7 +90,7 @@ Each todo document contains:
 
 **Muzammil Hussain**
 
-- GitHub: Add your GitHub profile link
+- GitHub: [@muzammil-developer](https://github.com/muzammil-developer)
 - Instagram: [@muzammil__hussain2028](https://www.instagram.com/muzammil__hussain2028/)
 
 ---
