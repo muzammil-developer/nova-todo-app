@@ -32,6 +32,7 @@ Nova-Todo-App/
 │
 ├── index.html
 ├── dashboard.html
+├── style.css
 ├── index.js
 ├── dashboard.js
 ├── firebase.config.js
@@ -43,7 +44,7 @@ Nova-Todo-App/
 1. Clone this repository:
 
    ```bash
-   git clone YOUR_REPOSITORY_URL
+   git clone nova-todo-app
    ```
 
 2. Open the project folder in VS Code.
@@ -74,17 +75,8 @@ Each todo document contains:
 | user_uid | String | Firebase user UID |
 | created_at | Number | Todo creation timestamp |
 
-## 📸 Application Preview
-
-Add your project screenshots here:
-
-```markdown
-![Nova Todo App](screenshots/dashboard.png)
-```
-
 ## 🎯 Future Improvements
 
-- Edit existing todos.
 - Mark todos as completed.
 - Add task categories.
 - Add due dates and reminders.
