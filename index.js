@@ -1,82 +1,291 @@
 import { auth, db } from "./firebase.config.js";
 
 import {
-  setDoc,
-  doc,
+    setDoc,
+    doc,
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
+
 import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
+
 
 let isAuthenticating = false;
 
-onAuthStateChanged(auth, (user) => {
-  if (isAuthenticating) {
-    return;
-  }
 
-  if (user) {
-    if (window.location.pathname !== "/dashboard.html") {
-      window.location.href = "./dashboard.html";
+// Bootstrap Toast Notification
+
+const showToast = (message, type = "danger") => {
+
+    const toastElement = document.getElementById("notification-toast");
+
+    const toastMessage = document.getElementById("toast-message");
+
+    if (!toastElement || !toastMessage) {
+        console.error("Toast elements not found!");
+        return;
     }
-  } else {
-    console.log("User is signed out");
-    if (window.location.pathname === "/dashboard.html") {
-      window.location.href = "./index.html";
+
+    toastMessage.textContent = message;
+
+    toastElement.className = `toast border-0 shadow text-bg-${type}`;
+
+    const toast = bootstrap.Toast.getOrCreateInstance(toastElement, {
+        delay: 3500
+    });
+
+    toast.show();
+
+};
+
+
+// Authentication State
+
+onAuthStateChanged(auth, (user) => {
+
+    if (isAuthenticating) return;
+
+    const isDashboard =
+        window.location.pathname.endsWith("/dashboard.html");
+
+    if (user) {
+
+        if (!isDashboard) {
+            window.location.href = "./dashboard.html";
+        }
+
+    } else {
+
+        if (isDashboard) {
+            window.location.href = "./index.html";
+        }
+
     }
-  }
+
 });
 
-const login = (e) => {
-  e.preventDefault();
 
-  const email = document.getElementById("login-email").value;
-  const password = document.getElementById("login-password").value;
+// Login
 
-  signInWithEmailAndPassword(auth, email, password)
-    .catch((error) => {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.log(errorMessage, errorCode);
-    });
+const login = async (e) => {
+
+    e.preventDefault();
+
+    const email = document
+        .getElementById("login-email")
+        .value.trim();
+
+    const password = document
+        .getElementById("login-password")
+        .value;
+
+    if (!email || !password) {
+
+        showToast("Please enter your email and password!");
+
+        return;
+
+    }
+
+    isAuthenticating = true;
+
+    const loginButton = document.getElementById("login-button");
+
+    try {
+
+        loginButton.disabled = true;
+
+        loginButton.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Logging in...
+        `;
+
+        await signInWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
+
+        window.location.href = "./dashboard.html";
+
+    } catch (error) {
+
+        console.error("Login Error:", error.code);
+
+        if (error.code === "auth/user-not-found") {
+
+            showToast("User not found! Please check your email.");
+
+        }
+
+        else if (error.code === "auth/wrong-password") {
+
+            showToast("Incorrect password! Please try again.");
+
+        }
+
+        else if (error.code === "auth/invalid-email") {
+
+            showToast("Please enter a valid email address.");
+
+        }
+
+        else if (error.code === "auth/invalid-credential") {
+
+            showToast("Incorrect email or password. Please try again.");
+
+        }
+
+        else if (error.code === "auth/too-many-requests") {
+
+            showToast("Too many failed attempts. Please try again later.");
+
+        }
+
+        else {
+
+            showToast("Login failed! Please try again.");
+
+        }
+
+    } finally {
+
+        isAuthenticating = false;
+
+        loginButton.disabled = false;
+
+        loginButton.innerHTML = "Login to Account";
+
+    }
+
 };
 
-const register = (e) => {
-  e.preventDefault();
-  isAuthenticating = true;
 
-  const email = document.getElementById("register-email").value;
-  const password = document.getElementById("register-password").value;
+// Register
 
-  createUserWithEmailAndPassword(auth, email, password)
-    .then(async (userCredential) => {
-      const user = userCredential.user;
+const register = async (e) => {
 
-      await setDoc(doc(db, "users", user.uid), {
-        email: user.email,
-        username: "",
-        phone: "",
-        uid: user.uid,
-      });
+    e.preventDefault();
 
-      window.location.href = "./dashboard.html";
-    })
-    .catch((error) => {
-      const errorMessage = error.message;
-      alert(errorMessage);
-    })
-    .finally(() => {
-      isAuthenticating = false;
-    });
+    isAuthenticating = true;
+
+    const username = document
+        .getElementById("register-username")
+        .value.trim();
+
+    const email = document
+        .getElementById("register-email")
+        .value.trim();
+
+    const password = document
+        .getElementById("register-password")
+        .value;
+
+
+    if (!username) {
+
+        showToast("Username is required!");
+
+        isAuthenticating = false;
+
+        return;
+
+    }
+
+
+    try {
+
+        const userCredential = await createUserWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
+
+        const user = userCredential.user;
+
+
+        await setDoc(doc(db, "users", user.uid), {
+
+            username: username,
+
+            email: email,
+
+            uid: user.uid,
+
+            phone: ""
+
+        });
+
+
+        window.location.href = "./dashboard.html";
+
+
+    } catch (error) {
+
+        console.error("Signup Error:", error);
+
+        if (error.code === "auth/email-already-in-use") {
+
+            showToast("This email is already registered!");
+
+        }
+
+        else if (error.code === "auth/weak-password") {
+
+            showToast("Password must be at least 6 characters!");
+
+        }
+
+        else if (error.code === "auth/invalid-email") {
+
+            showToast("Please enter a valid email address!");
+
+        }
+
+        else {
+
+            showToast("Signup failed! Please try again.");
+
+        }
+
+    } finally {
+
+        isAuthenticating = false;
+
+    }
+
 };
+
+
+// Logout
 
 const logout = () => {
-  signOut(auth);
+
+    signOut(auth)
+        .catch((error) => {
+
+            console.error("Logout Error:", error);
+
+            showToast("Unable to logout. Please try again.");
+
+        });
+
 };
 
-document.getElementById("login-form")?.addEventListener("submit", login);
-document.getElementById("register-form")?.addEventListener("submit", register);
-document.getElementById("logout")?.addEventListener("click", logout);
+
+// Form Events
+
+document
+    .getElementById("login-form")
+    ?.addEventListener("submit", login);
+
+document
+    .getElementById("register-form")
+    ?.addEventListener("submit", register);
+
+document
+    .getElementById("logout")
+    ?.addEventListener("click", logout);
